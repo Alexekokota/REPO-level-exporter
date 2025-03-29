@@ -1,0 +1,17 @@
+{
+    "name": "com.alexekokota.customlevelexporter",
+    "version": "1.0.0",
+    "displayName": "Custom Level Exporter",
+    "description": "A tool for exporting custom levels as asset bundles.",
+    "unity": "2021.3",
+    "author": {
+        "name": "Alexekokota",
+        "email": "Alexekokota@hotmail.com",
+        "url": "https://github.com/Alexekokota"
+    },
+    "dependencies": {},
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Alexekokota/REPO-level-exporter"
+    }
+}
