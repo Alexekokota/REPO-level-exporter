@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "displayName": "Custom Level Exporter",
     "description": "A tool for exporting custom levels as asset bundles.",
-    "unity": "2022.3.21f1",
+    "unity": "2022.3",
     "author": {
         "name": "Alexekokota",
         "email": "Alexekokota@hotmail.com",
