@@ -102,9 +102,9 @@ public class CustomLevelExporter : EditorWindow
     void BuildAssetBundle(string outputPath)
     {
         string bundleFolder = Path.Combine(outputPath, "AssetBundles");
-        Directory.CreateDirectory(bundleFolder); // Ensure AssetBundle folder exists
+        Directory.CreateDirectory(bundleFolder);
 
-        HashSet<string> assetsSet = new HashSet<string>(); // Prevent duplicates
+        HashSet<string> assetsSet = new HashSet<string>();
         string selectedLevelPath = AssetDatabase.GetAssetPath(selectedLevel);
 
         if (!string.IsNullOrEmpty(selectedLevelPath))
@@ -114,10 +114,21 @@ public class CustomLevelExporter : EditorWindow
 
             foreach (string asset in dependencies)
             {
-                if (!asset.EndsWith(".cs")) // Exclude scripts
+                if (!asset.EndsWith(".cs") && !asset.Contains("/Editor/")) // Exclude scripts and editor files
                 {
                     assetsSet.Add(asset);
                 }
+            }
+        }
+
+        // Ensure prefabs in "Level/" path are included
+        string[] prefabPaths = Directory.GetFiles(Application.dataPath, "*.prefab", SearchOption.AllDirectories);
+        foreach (string prefabPath in prefabPaths)
+        {
+            string assetPath = "Assets" + prefabPath.Replace(Application.dataPath, "").Replace("\\", "/");
+            if (assetPath.Contains("Level/") && AssetDatabase.LoadAssetAtPath<GameObject>(assetPath) != null)
+            {
+                assetsSet.Add(assetPath);
             }
         }
 
@@ -133,7 +144,7 @@ public class CustomLevelExporter : EditorWindow
 
         if (File.Exists(builtBundlePath))
         {
-            File.Move(builtBundlePath, finalBundlePath); // Move to final location
+            File.Move(builtBundlePath, finalBundlePath);
             Debug.Log("Custom level exported successfully! AssetBundle created at: " + finalBundlePath);
         }
         else
@@ -141,6 +152,7 @@ public class CustomLevelExporter : EditorWindow
             Debug.LogError("AssetBundle creation failed! No bundle found at: " + builtBundlePath);
         }
     }
+
 
 
 
