@@ -103,12 +103,16 @@ public class CustomLevelExporter : EditorWindow
     {
         string bundlePath = Path.Combine(outputPath, modName + ".bundle");
 
+        List<string> assets = new List<string> { AssetDatabase.GetAssetPath(selectedLevel) };
+        string[] dependencies = AssetDatabase.GetDependencies(AssetDatabase.GetAssetPath(selectedLevel), true);
+        assets.AddRange(dependencies);
+
         AssetBundleBuild[] buildMap = new AssetBundleBuild[1];
         buildMap[0].assetBundleName = modName + ".bundle";
-        buildMap[0].assetNames = new string[] { AssetDatabase.GetAssetPath(selectedLevel) };
+        buildMap[0].assetNames = assets.ToArray();
 
         BuildPipeline.BuildAssetBundles(outputPath, buildMap, BuildAssetBundleOptions.None, BuildTarget.StandaloneWindows);
-        Debug.Log("Custom level exported successfully!");
+        Debug.Log("Custom level exported successfully! AssetBundle contains: " + string.Join(", ", assets));
     }
 
     void CompressToZip(string folderPath)
