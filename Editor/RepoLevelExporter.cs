@@ -105,7 +105,15 @@ public class CustomLevelExporter : EditorWindow
 
         List<string> assets = new List<string> { AssetDatabase.GetAssetPath(selectedLevel) };
         string[] dependencies = AssetDatabase.GetDependencies(AssetDatabase.GetAssetPath(selectedLevel), true);
-        assets.AddRange(dependencies);
+
+        // Exclude scripts from AssetBundle
+        foreach (string asset in dependencies)
+        {
+            if (!asset.EndsWith(".cs")) // Prevent scripts from being added
+            {
+                assets.Add(asset);
+            }
+        }
 
         AssetBundleBuild[] buildMap = new AssetBundleBuild[1];
         buildMap[0].assetBundleName = modName + ".bundle";
@@ -114,6 +122,7 @@ public class CustomLevelExporter : EditorWindow
         BuildPipeline.BuildAssetBundles(outputPath, buildMap, BuildAssetBundleOptions.None, BuildTarget.StandaloneWindows);
         Debug.Log("Custom level exported successfully! AssetBundle contains: " + string.Join(", ", assets));
     }
+
 
     void CompressToZip(string folderPath)
     {
