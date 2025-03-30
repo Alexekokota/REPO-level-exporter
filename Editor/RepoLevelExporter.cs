@@ -104,20 +104,27 @@ public class CustomLevelExporter : EditorWindow
         string bundleFolder = Path.Combine(outputPath, "AssetBundles");
         Directory.CreateDirectory(bundleFolder); // Ensure AssetBundle folder exists
 
-        List<string> assets = new List<string> { AssetDatabase.GetAssetPath(selectedLevel) };
-        string[] dependencies = AssetDatabase.GetDependencies(AssetDatabase.GetAssetPath(selectedLevel), true);
+        HashSet<string> assetsSet = new HashSet<string>(); // Prevent duplicates
+        string selectedLevelPath = AssetDatabase.GetAssetPath(selectedLevel);
 
-        foreach (string asset in dependencies)
+        if (!string.IsNullOrEmpty(selectedLevelPath))
         {
-            if (!asset.EndsWith(".cs")) // Prevent scripts from being added
+            assetsSet.Add(selectedLevelPath);
+            string[] dependencies = AssetDatabase.GetDependencies(selectedLevelPath, true);
+
+            foreach (string asset in dependencies)
             {
-                assets.Add(asset);
+                if (!asset.EndsWith(".cs")) // Exclude scripts
+                {
+                    assetsSet.Add(asset);
+                }
             }
         }
 
         AssetBundleBuild[] buildMap = new AssetBundleBuild[1];
         buildMap[0].assetBundleName = modName.ToLower() + ".bundle";
-        buildMap[0].assetNames = assets.ToArray();
+        buildMap[0].assetNames = new string[assetsSet.Count];
+        assetsSet.CopyTo(buildMap[0].assetNames);
 
         BuildPipeline.BuildAssetBundles(bundleFolder, buildMap, BuildAssetBundleOptions.None, BuildTarget.StandaloneWindows);
 
@@ -134,6 +141,7 @@ public class CustomLevelExporter : EditorWindow
             Debug.LogError("AssetBundle creation failed! No bundle found at: " + builtBundlePath);
         }
     }
+
 
 
 
