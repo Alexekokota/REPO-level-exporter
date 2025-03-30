@@ -101,12 +101,12 @@ public class CustomLevelExporter : EditorWindow
 
     void BuildAssetBundle(string outputPath)
     {
-        string bundlePath = Path.Combine(outputPath, modName + ".bundle");
+        string bundleFolder = Path.Combine(outputPath, "AssetBundles");
+        Directory.CreateDirectory(bundleFolder); // Ensure AssetBundle folder exists
 
         List<string> assets = new List<string> { AssetDatabase.GetAssetPath(selectedLevel) };
         string[] dependencies = AssetDatabase.GetDependencies(AssetDatabase.GetAssetPath(selectedLevel), true);
 
-        // Exclude scripts from AssetBundle
         foreach (string asset in dependencies)
         {
             if (!asset.EndsWith(".cs")) // Prevent scripts from being added
@@ -116,12 +116,25 @@ public class CustomLevelExporter : EditorWindow
         }
 
         AssetBundleBuild[] buildMap = new AssetBundleBuild[1];
-        buildMap[0].assetBundleName = modName + ".bundle";
+        buildMap[0].assetBundleName = modName.ToLower() + ".bundle";
         buildMap[0].assetNames = assets.ToArray();
 
-        BuildPipeline.BuildAssetBundles(outputPath, buildMap, BuildAssetBundleOptions.None, BuildTarget.StandaloneWindows);
-        Debug.Log("Custom level exported successfully! AssetBundle contains: " + string.Join(", ", assets));
+        BuildPipeline.BuildAssetBundles(bundleFolder, buildMap, BuildAssetBundleOptions.None, BuildTarget.StandaloneWindows);
+
+        string builtBundlePath = Path.Combine(bundleFolder, modName.ToLower() + ".bundle");
+        string finalBundlePath = Path.Combine(outputPath, modName.ToLower() + ".bundle");
+
+        if (File.Exists(builtBundlePath))
+        {
+            File.Move(builtBundlePath, finalBundlePath); // Move to final location
+            Debug.Log("Custom level exported successfully! AssetBundle created at: " + finalBundlePath);
+        }
+        else
+        {
+            Debug.LogError("AssetBundle creation failed! No bundle found at: " + builtBundlePath);
+        }
     }
+
 
 
     void CompressToZip(string folderPath)
